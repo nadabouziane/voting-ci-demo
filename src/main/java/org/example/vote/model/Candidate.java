@@ -1,4 +1,3 @@
 package org.example.vote.model;
 
-public class Candidate {
-}
+public record Candidate(String id, String name) {}
