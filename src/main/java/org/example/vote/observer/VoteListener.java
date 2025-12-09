@@ -1,4 +1,7 @@
 package org.example.vote.observer;
 
-public class VoteListener {
+import org.example.vote.model.Vote;
+
+public interface VoteListener {
+    void onVote(Vote vote);
 }
