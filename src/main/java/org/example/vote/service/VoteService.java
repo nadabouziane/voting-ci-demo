@@ -24,4 +24,9 @@ public class VoteService {
     }
 
     public void reset(){ repo.clear(); }
+
+    public int countVotes() {
+        return repo.findAll().size();
+    }
+
 }

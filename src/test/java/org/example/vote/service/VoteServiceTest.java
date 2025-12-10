@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class VoteServiceTest {
     @Test
@@ -23,4 +24,16 @@ public class VoteServiceTest {
         assertEquals(2, res.get("Alice"));
         assertEquals(1, res.get("Bob"));
     }
+
+    @Test
+    void testResetClearsRepo() {
+        var repo = new InMemoryVoteRepository();
+        var svc = new VoteService(repo);
+
+        svc.cast(new Vote("v1","Alice", System.currentTimeMillis()));
+        svc.reset();
+
+        assertTrue(repo.findAll().isEmpty());
+    }
+
 }
