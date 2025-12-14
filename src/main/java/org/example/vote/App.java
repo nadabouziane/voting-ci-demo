@@ -1,48 +1,51 @@
 package org.example.vote;
 
 import org.example.vote.factory.RepositoryFactory;
-import org.example.vote.model.Vote;
 import org.example.vote.observer.LoggingVoteListener;
 import org.example.vote.repo.VoteRepository;
 import org.example.vote.service.VoteService;
-import org.example.vote.strategy.PluralityCountingStrategy;
 
-import java.util.Map;
 import java.util.Scanner;
 
 public class App {
+
     public static void main(String[] args) {
         VoteRepository repo = RepositoryFactory.createRepo("memory");
         VoteService svc = new VoteService(repo);
         svc.addListener(new LoggingVoteListener());
 
+        CommandHandler handler = new CommandHandler(svc);
+
         Scanner sc = new Scanner(System.in);
         System.out.println("Welcome to VotingApp! Type 'vote', 'count', 'reset', 'exit'");
 
-        while(true){
+        while (true) {
             String cmd = sc.nextLine();
-            switch(cmd){
+
+            switch (cmd) {
                 case "vote":
                     System.out.println("Voter ID:");
                     String voterId = sc.nextLine();
                     System.out.println("Candidate ID:");
                     String candidateId = sc.nextLine();
-                    svc.cast(new Vote(voterId, candidateId, System.currentTimeMillis()));
+                    System.out.println(handler.handle("vote", voterId, candidateId));
                     break;
+
                 case "count":
-                    Map<String,Integer> res = svc.count(new PluralityCountingStrategy());
-                    System.out.println("Results: " + res);
+                    System.out.println(handler.handle("count", null, null));
                     break;
+
                 case "reset":
-                    svc.reset();
-                    System.out.println("Reset done");
+                    System.out.println(handler.handle("reset", null, null));
                     break;
+
                 case "exit":
                     System.out.println("Bye!");
                     sc.close();
                     return;
+
                 default:
-                    System.out.println("Unknown command");
+                    System.out.println(handler.handle(cmd, null, null));
             }
         }
     }

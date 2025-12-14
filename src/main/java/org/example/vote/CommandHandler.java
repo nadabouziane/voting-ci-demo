@@ -12,8 +12,8 @@ public class CommandHandler {
         this.service = service;
     }
 
-    public String handle(String cmd, String voterId, String candidateId) {
-        switch (cmd) {
+    public String handle(String command, String voterId, String candidateId) {
+        switch (command) {
             case "vote":
                 service.cast(new Vote(voterId, candidateId, System.currentTimeMillis()));
                 return "ok";
