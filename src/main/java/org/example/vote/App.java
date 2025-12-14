@@ -1,52 +1,77 @@
 package org.example.vote;
 
 import org.example.vote.factory.RepositoryFactory;
+import org.example.vote.model.Vote;
 import org.example.vote.observer.LoggingVoteListener;
 import org.example.vote.repo.VoteRepository;
 import org.example.vote.service.VoteService;
+import org.example.vote.strategy.PluralityCountingStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.Scanner;
 
 public class App {
 
-    public static void main(String[] args) {
+    private static final Logger logger = LoggerFactory.getLogger(App.class);
+
+    private final VoteService voteService;
+    private final Scanner scanner;
+
+    public App() {
         VoteRepository repo = RepositoryFactory.createRepo("memory");
-        VoteService svc = new VoteService(repo);
-        svc.addListener(new LoggingVoteListener());
+        this.voteService = new VoteService(repo);
+        this.voteService.addListener(new LoggingVoteListener());
+        this.scanner = new Scanner(System.in);
+    }
 
-        CommandHandler handler = new CommandHandler(svc);
+    public static void main(String[] args) {
+        new App().run();
+    }
 
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Welcome to VotingApp! Type 'vote', 'count', 'reset', 'exit'");
+    public void run() {
+        logger.info("Welcome to VotingApp! Type 'vote', 'count', 'reset', 'exit'");
 
-        while (true) {
-            String cmd = sc.nextLine();
-
-            switch (cmd) {
-                case "vote":
-                    System.out.println("Voter ID:");
-                    String voterId = sc.nextLine();
-                    System.out.println("Candidate ID:");
-                    String candidateId = sc.nextLine();
-                    System.out.println(handler.handle("vote", voterId, candidateId));
-                    break;
-
-                case "count":
-                    System.out.println(handler.handle("count", null, null));
-                    break;
-
-                case "reset":
-                    System.out.println(handler.handle("reset", null, null));
-                    break;
-
-                case "exit":
-                    System.out.println("Bye!");
-                    sc.close();
-                    return;
-
-                default:
-                    System.out.println(handler.handle(cmd, null, null));
-            }
+        boolean running = true;
+        while (running) {
+            String cmd = scanner.nextLine().trim().toLowerCase();
+            running = handleCommand(cmd);
         }
+
+        scanner.close();
+        logger.info("Bye!");
+    }
+
+    private boolean handleCommand(String command) {
+        switch (command) {
+            case "vote" -> handleVote();
+            case "count" -> handleCount();
+            case "reset" -> handleReset();
+            case "exit" -> { return false; }
+            default -> logger.warn("Unknown command");
+        }
+        return true;
+    }
+
+    private void handleVote() {
+        logger.info("Enter Voter ID: ");
+        String voterId = scanner.nextLine();
+
+        logger.info("Enter Candidate ID: ");
+        String candidateId = scanner.nextLine();
+
+        voteService.cast(new Vote(voterId, candidateId, System.currentTimeMillis()));
+        logger.info("Vote cast successfully!");
+    }
+
+    private void handleCount() {
+        Map<String, Integer> results = voteService.count(new PluralityCountingStrategy());
+        logger.info("Results: {}", results);
+    }
+
+    private void handleReset() {
+        voteService.reset();
+        logger.info("Reset done");
     }
 }

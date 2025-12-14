@@ -4,27 +4,26 @@ import org.example.vote.model.Vote;
 import org.example.vote.service.VoteService;
 import org.example.vote.strategy.PluralityCountingStrategy;
 
+import java.util.Map;
+
 public class CommandHandler {
+    private final VoteService svc;
 
-    private final VoteService service;
-
-    public CommandHandler(VoteService service) {
-        this.service = service;
+    public CommandHandler(VoteService svc) {
+        this.svc = svc;
     }
 
     public String handle(String command, String voterId, String candidateId) {
         switch (command) {
             case "vote":
-                service.cast(new Vote(voterId, candidateId, System.currentTimeMillis()));
+                svc.cast(new Vote(voterId, candidateId, System.currentTimeMillis()));
                 return "ok";
-
             case "count":
-                return service.count(new PluralityCountingStrategy()).toString();
-
+                Map<String,Integer> res = svc.count(new PluralityCountingStrategy());
+                return res.toString();
             case "reset":
-                service.reset();
+                svc.reset();
                 return "reset";
-
             default:
                 return "unknown";
         }

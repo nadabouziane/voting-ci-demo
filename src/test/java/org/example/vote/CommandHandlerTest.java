@@ -3,26 +3,24 @@ package org.example.vote;
 import org.example.vote.repo.InMemoryVoteRepository;
 import org.example.vote.service.VoteService;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CommandHandlerTest {
 
     @Test
-    void testVoteCommand() {
+    void testVote() {
         VoteService svc = new VoteService(new InMemoryVoteRepository());
         CommandHandler handler = new CommandHandler(svc);
 
-        String result = handler.handle("vote", "v1", "c1");
-        assertEquals("ok", result);
-        assertEquals(1, svc.countVotes(), "Vote should be counted");
+        String res = handler.handle("vote", "v1", "c1");
+        assertEquals("ok", res);
+        assertEquals(1, svc.countVotes());
     }
 
     @Test
-    void testCountCommand() {
+    void testCount() {
         VoteService svc = new VoteService(new InMemoryVoteRepository());
-        svc.cast(new org.example.vote.model.Vote("v1", "c1", 1));
-
+        svc.cast(new org.example.vote.model.Vote("v1","c1",1));
         CommandHandler handler = new CommandHandler(svc);
 
         String res = handler.handle("count", null, null);
@@ -30,10 +28,9 @@ public class CommandHandlerTest {
     }
 
     @Test
-    void testResetCommand() {
+    void testReset() {
         VoteService svc = new VoteService(new InMemoryVoteRepository());
-        svc.cast(new org.example.vote.model.Vote("v1", "c1", 1));
-
+        svc.cast(new org.example.vote.model.Vote("v1","c1",1));
         CommandHandler handler = new CommandHandler(svc);
 
         String res = handler.handle("reset", null, null);
@@ -42,7 +39,7 @@ public class CommandHandlerTest {
     }
 
     @Test
-    void testUnknownCommand() {
+    void testUnknown() {
         VoteService svc = new VoteService(new InMemoryVoteRepository());
         CommandHandler handler = new CommandHandler(svc);
 
