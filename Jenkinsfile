@@ -8,6 +8,7 @@ pipeline {
 
     environment {
         SONAR_PROJECT_KEY = 'voting-ci-demo'
+        MAVEN_OPTS = '-Xmx1024m -XX:+UseG1GC'
     }
 
     stages {
@@ -26,7 +27,8 @@ pipeline {
 
         stage('JUnit Reports') {
             steps {
-                junit 'target/surefire-reports/*.xml'
+                junit allowEmptyResults: false,
+                      testResults: 'target/surefire-reports/*.xml'
             }
         }
 
@@ -34,8 +36,8 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonar') {
                     sh """
-                    mvn sonar:sonar \
-                      -Dsonar.projectKey=${SONAR_PROJECT_KEY}
+                        mvn sonar:sonar \
+                          -Dsonar.projectKey=${SONAR_PROJECT_KEY}
                     """
                 }
             }
@@ -65,6 +67,12 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+        }
+        success {
+            echo '✅ Jenkins environment fully aligned with POM'
+        }
+        failure {
+            echo '❌ Build failed due to Jenkins environment mismatch'
         }
     }
 }
